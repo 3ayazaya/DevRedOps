@@ -1,0 +1,10 @@
+version: '3'
+
+env:
+  BUILD_ARCHS: linux/amd64,linux/arm64
+  REGISTRY_IMAGE: 3ayazaya/cobalt-strike
+
+tasks:
+  build:
+    cmds:
+      - docker buildx build --platform $BUILD_ARCHS --progress plain --pull -t $REGISTRY_IMAGE:latest --push .
