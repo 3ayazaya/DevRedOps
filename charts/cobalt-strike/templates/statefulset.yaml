@@ -7,6 +7,7 @@ metadata:
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "cobalt-strike.fullname" . }}
   {{- end }}
   selector:
     matchLabels:
