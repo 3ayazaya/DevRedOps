@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "cobalt-strike.fullname" . }}
+  labels:
+    {{- include "cobalt-strike.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "cobalt-strike.fullname" . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cobalt-strike.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "cobalt-strike.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cobalt-strike.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range .Values.service.ports }}
+          - containerPort: {{ .targetPort }}
+            protocol: {{ .protocol }}
+            name: {{ .name }}
+          {{- end }}
+          env:
+            - name: TS_PASSWORD
+              value: {{ .Values.teamserver.password | quote }}
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          args: [ "$(POD_IP)", "$(TS_PASSWORD)" ]
+          readinessProbe:
+            tcpSocket:
+              {{ $adminPort := .Values.service.ports }}
+              {{ range $k, $v := $adminPort }}
+              {{ if eq (toString $v.name) "admin" }}
+              port: {{ toString $v.port }}
+              {{- end }}
+              {{- end }}
+          livenessProbe:
+              tcpSocket:
+                {{ $adminPort := .Values.service.ports }}
+                {{ range $k, $v := $adminPort }}
+                {{ if eq (toString $v.name) "admin" }}
+                port: {{ toString $v.port }}
+                {{- end }}
+                {{- end }}
+          livenessProbe:
+            tcpSocket:
+                {{ $adminPort := .Values.service.ports }}
+                {{ range $k, $v := $adminPort }}
+                {{ if eq (toString $v.name) "admin" }}
+              port: {{ toString $v.port }}
+                {{- end }}
+                {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.teamserver.persistence.volumes }}
+            {{- $teamserver := .Values.teamserver.persistence.volumes }}
+            {{- range $k, $e := $teamserver }}
+            - name: {{$k}}
+              mountPath: /opt/cobaltstrike/{{$k}}
+          {{- end }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.teamserver.persistence.enabled }}
+  volumeClaimTemplates:
+    {{- $teamserver := .Values.teamserver.persistence.volumes }}
+    {{- $root := . }}
+    {{- range $k, $e := $teamserver }}
+    - metadata:
+        name: {{$k}}
+      spec:
+        accessModes:
+          - "{{ $root.Values.teamserver.persistence.accessMode }}"
+        resources:
+          requests:
+            storage: "{{ .size }}"
+        {{- if $root.Values.teamserver.persistence.storageClass }}
+        {{- if (eq "-" $root.Values.teamserver.persistence.storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ $root.Values.teamserver.persistence.storageClass }}"
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
