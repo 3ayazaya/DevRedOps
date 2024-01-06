@@ -50,7 +50,7 @@ teamserver:
     # storageClass: ""
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - name: admin
       port: 50050
