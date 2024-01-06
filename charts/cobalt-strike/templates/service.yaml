@@ -6,7 +6,9 @@ metadata:
     {{- include "cobalt-strike.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
+{{- if eq .Values.service.type "ClusterIP" }}
   clusterIP: None
+{{- end }}
   ports:
   {{- range .Values.service.ports }}
     - port: {{ .port }}
