@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redops-app-of-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    targetRevision: develop
+    repoURL: https://github.com/3ayazaya/DevRedOps.git
+    path: argocd/apps
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: redops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

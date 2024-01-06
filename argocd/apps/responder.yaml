@@ -1,0 +1,75 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: responder
+  namespace: argocd
+spec:
+  project: default
+  source:
+    targetRevision: develop
+    repoURL: https://github.com/3ayazaya/DevRedOps.git
+    path: charts/responder
+    helm:
+      values: |-
+        image:
+          repository: alexfrancow/responder
+          tag: "latest"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+        service:
+          type: LoadBalancer
+          ports:
+            - name: smb-455
+              port: 455
+              targetPort: 455
+              protocol: TCP
+            - name: smb-139
+              port: 139
+              targetPort: 139
+              protocol: TCP
+            - name: http
+              port: 80
+              targetPort: 80
+              protocol: TCP
+            - name: https
+              port: 443
+              targetPort: 443
+              protocol: TCP
+            - name: dns-udp
+              port: 53
+              targetPort: 53
+              protocol: UDP
+            - name: dns-tcp
+              port: 53
+              targetPort: 53
+              protocol: TCP
+            - name: krb-udp
+              port: 88
+              targetPort: 88
+              protocol: UDP
+            - name: krb-tcp
+              port: 88
+              targetPort: 88
+              protocol: TCP
+            - name: ldap
+              port: 389
+              targetPort: 389
+              protocol: TCP
+            - name: smtp
+              port: 25
+              targetPort: 25
+              protocol: TCP
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: redops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

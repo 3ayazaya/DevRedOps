@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: teamserver
+  namespace: argocd
+spec:
+  project: default
+  source:
+    targetRevision: develop
+    repoURL: https://github.com/3ayazaya/DevRedOps.git
+    path: charts/cobalt-strike
+    helm:
+      values: |-
+        image:
+          repository: 3ayazaya/cobalt-strike
+          tag: "latest"
+        teamserver:
+          password: "changeme"
+        service:
+          type: LoadBalancer
+          ports:
+            - name: admin
+              port: 50050
+              targetPort: 50050
+              protocol: TCP
+            - name: http-listener
+              port: 80
+              targetPort: 80
+              protocol: TCP
+            - name: https-listener
+              port: 443
+              targetPort: 443
+              protocol: TCP
+            - name: dns-udp-ls
+              port: 53
+              targetPort: 53
+              protocol: UDP
+            - name: dns-tcp-ls
+              port: 53
+              targetPort: 53
+              protocol: TCP
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: redops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chisel
+  namespace: argocd
+spec:
+  project: default
+  source:
+    targetRevision: develop
+    repoURL: https://github.com/3ayazaya/DevRedOps.git
+    path: charts/chisel
+    helm:
+      values: |-
+        args:
+          auth:
+          host:
+          key:
+          authfile:
+          keepalive: 0s
+          backend:
+          socks5: true
+          reverse: true
+          tls:
+            key:
+            cert:
+            domain:
+            ca:
+          verbose: true
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: nginx
+          host: chisel.red.ops
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: redops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
