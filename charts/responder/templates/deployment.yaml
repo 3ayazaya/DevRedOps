@@ -42,7 +42,7 @@ spec:
               name: https
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          livenessProbe:
+          readinessProbe:
             tcpSocket:
                 {{ $smbPort := .Values.service.ports }}
                 {{ range $k, $v := $smbPort }}
