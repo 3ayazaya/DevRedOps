@@ -44,17 +44,17 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           readinessProbe:
             tcpSocket:
-                {{ $smbPort := .Values.service.ports }}
-                {{ range $k, $v := $smbPort }}
-                {{ if eq (toString $v.name) "smb-455" }}
+                {{ $httpPort := .Values.service.ports }}
+                {{ range $k, $v := $httpPort }}
+                {{ if eq (toString $v.name) "http" }}
               port: {{ toString $v.port }}
                 {{- end }}
                 {{- end }}
           livenessProbe:
             tcpSocket:
-                {{ $smbPort := .Values.service.ports }}
-                {{ range $k, $v := $smbPort }}
-                {{ if eq (toString $v.name) "smb-455" }}
+                {{ $http := .Values.service.ports }}
+                {{ range $k, $v := $httpPort }}
+                {{ if eq (toString $v.name) "http" }}
               port: {{ toString $v.port }}
                 {{- end }}
                 {{- end }}
