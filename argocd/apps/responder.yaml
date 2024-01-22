@@ -12,7 +12,7 @@ spec:
     helm:
       values: |-
         image:
-          repository: alexfrancow/responder
+          repository: 3ayazaya/responder
           tag: "latest"
         resources:
           limits:
