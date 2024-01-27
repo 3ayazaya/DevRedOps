@@ -14,6 +14,13 @@ spec:
         image:
           repository: 3ayazaya/cobalt-strike
           tag: "latest"
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
         teamserver:
           password: "changeme"
         service:
