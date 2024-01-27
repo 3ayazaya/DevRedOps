@@ -32,7 +32,7 @@ spec:
                   resources:
                    requests:
                      storage: 1Gi
-            retentionSize: 1GiB
+            retentionSize: 800MiB
         alertmanager:
           ingress:
             enabled: true
