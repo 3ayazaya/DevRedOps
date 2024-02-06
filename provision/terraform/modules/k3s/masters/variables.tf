@@ -95,5 +95,27 @@ variable "nameserver" {
   default = "192.168.20.1"
 }
 variable "searchdomain" {
-  default = "k8s.home.lab home.lab"
+  default = "k8s.home.lab,home.lab"
+}
+variable "master_ips" {
+  description = "List of ip addresses for master nodes"
+  default = [
+    "10.1.8.4"
+  ]
+  type = list(string)
+}
+variable "network_mask" {
+  description = "Network mask prefix"
+  default = 25
+  type = number
+}
+variable "gateway" {
+  description = "Network default gateway"
+  default = "10.1.8.1"
+  type = string
+}
+variable "ipconfig0" {
+  description = "Cloud init network"
+  default = "ip=dhcp"
+  type = string
 }
