@@ -1,0 +1,56 @@
+image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
+variables:
+  TF_ROOT: ${CI_PROJECT_DIR}/provision/terraform
+  TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_PROJECT_NAME}
+  PM_USER: ${PM_USER}
+  PM_PASS: ${PM_PASS}
+
+cache:
+  key: pve02-dev
+  paths:
+    - ${TF_ROOT}/.terraform
+
+before_script:
+  - cd ${TF_ROOT}
+  - cat $TERRAFORM_VARS > terraform.tfvars
+
+stages:
+  - prepare
+  - validate
+  - build
+  - deploy
+
+init:
+  stage: prepare
+  script:
+    - gitlab-terraform init
+
+validate:
+  stage: validate
+  script:
+    - gitlab-terraform init
+    - gitlab-terraform validate
+
+plan:
+  stage: build
+  script:
+    - gitlab-terraform plan
+    - gitlab-terraform plan-json
+  artifacts:
+    name: plan
+    paths:
+      - ${TF_ROOT}/plan.cache
+    reports:
+      terraform: ${TF_ROOT}/plan.json
+
+apply:
+  stage: deploy
+  environment:
+    name: pve02-dev
+  script:
+    - gitlab-terraform apply
+  dependencies:
+    - plan
+  when: manual
+  tags:
+    - docker
