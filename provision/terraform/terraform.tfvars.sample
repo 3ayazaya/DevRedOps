@@ -1,0 +1,35 @@
+pve_url = "https://pve.home.lab:8006/api2/json"
+master_ips = [
+  "10.1.8.6",
+  "10.1.8.7",
+  "10.1.8.8"
+]
+agent_ips = [
+  "10.1.8.9",
+  "10.1.8.10",
+  "10.1.8.11"
+]
+masters_count       = 3
+agents_count        = 3
+gateway             = "10.1.8.1"
+network_mask        = 25
+dns_address         = "10.1.8.1"
+dns_search_domains  = "k8s.home.lab,home.lab"
+pve_network_bridge  = "vmbr1"
+vlan_id             = 800
+
+masters_disk_size   = "32"
+masters_cpu         = 4
+masters_ram         = 4096
+
+agents_disk_size    = "100"
+agents_cpu          = 4
+agents_ram          = 4096
+
+vm_desc             = "k3s red infra cluster"
+template_name       = "ubuntu-2204-cloudinit-template"
+pve_node            = "pve"
+pve_storage         = "local-zfs"
+
+
+
